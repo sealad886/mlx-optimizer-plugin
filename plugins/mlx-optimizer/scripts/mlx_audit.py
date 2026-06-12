@@ -11,6 +11,7 @@ import ast
 import json
 import sys
 import time
+import tokenize
 from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Iterable
@@ -79,6 +80,13 @@ def is_mlx_import(node: ast.AST) -> bool:
     return False
 
 
+def display_path(path: Path, repo_root: Path) -> str:
+    try:
+        return str(path.relative_to(repo_root))
+    except ValueError:
+        return str(path)
+
+
 def call_name(node: ast.Call) -> str:
     func = node.func
     if isinstance(func, ast.Attribute):
@@ -107,13 +115,12 @@ class FileAnalyzer(ast.NodeVisitor):
         self.has_eval_call = False
         self.function_stack: list[dict[str, ast.AST | bool]] = []
         self.timed_functions_without_eval: list[ast.AST] = []
+        self.mlx_core_aliases: set[str] = set()
+        self.mlx_eval_aliases: set[str] = set()
 
     @property
     def display_path(self) -> str:
-        try:
-            return str(self.path.relative_to(self.repo_root))
-        except ValueError:
-            return str(self.path)
+        return display_path(self.path, self.repo_root)
 
     def add(self, category: str, severity: str, node: ast.AST, evidence: str, impact: str, recommendation: str, confidence: str) -> None:
         self.findings.append(
@@ -132,12 +139,28 @@ class FileAnalyzer(ast.NodeVisitor):
     def visit_Import(self, node: ast.Import) -> None:
         if is_mlx_import(node):
             self.has_mlx_import = True
+        for alias in node.names:
+            if alias.name == "mlx.core":
+                self.mlx_core_aliases.add(alias.asname or "mlx.core")
         self.generic_visit(node)
 
     def visit_ImportFrom(self, node: ast.ImportFrom) -> None:
         if is_mlx_import(node):
             self.has_mlx_import = True
+        if node.module == "mlx":
+            for alias in node.names:
+                if alias.name == "core":
+                    self.mlx_core_aliases.add(alias.asname or alias.name)
+        if node.module == "mlx.core":
+            for alias in node.names:
+                if alias.name == "eval":
+                    self.mlx_eval_aliases.add(alias.asname or alias.name)
         self.generic_visit(node)
+
+    def is_mlx_eval_call(self, name: str) -> bool:
+        if name in self.mlx_eval_aliases:
+            return True
+        return any(name == f"{alias}.eval" for alias in self.mlx_core_aliases)
 
     def visit_For(self, node: ast.For) -> None:
         self.loop_depth += 1
@@ -166,7 +189,7 @@ class FileAnalyzer(ast.NodeVisitor):
             self.has_timing_call = True
             if self.function_stack:
                 self.function_stack[-1]["has_timing_call"] = True
-        if name.endswith("mx.eval") or name == "eval":
+        if self.is_mlx_eval_call(name):
             self.has_eval_call = True
             if self.function_stack:
                 self.function_stack[-1]["has_eval_call"] = True
@@ -206,7 +229,8 @@ class FileAnalyzer(ast.NodeVisitor):
                 )
 
 def analyze_file(path: Path, root: Path) -> tuple[bool, list[Finding]]:
-    source = path.read_text(encoding="utf-8")
+    with tokenize.open(path) as handle:
+        source = handle.read()
     tree = ast.parse(source, filename=str(path))
     analyzer = FileAnalyzer(path, source, root)
     analyzer.visit(tree)
@@ -260,6 +284,7 @@ def render_markdown(payload: dict) -> str:
 
 def build_payload(target: Path) -> dict:
     root = target.resolve()
+    scan_root = root if root.is_dir() else root.parent
     files = iter_python_files(root)
     progress = Progress(len(files))
     findings: list[Finding] = []
@@ -267,17 +292,31 @@ def build_payload(target: Path) -> dict:
     for index, path in enumerate(files, start=1):
         progress.update(index, str(path))
         try:
-            has_mlx, file_findings = analyze_file(path, root if root.is_dir() else root.parent)
+            has_mlx, file_findings = analyze_file(path, scan_root)
         except SyntaxError as exc:
             findings.append(
                 Finding(
                     category="syntax-error",
                     severity="low",
-                    file=str(path),
+                    file=display_path(path, scan_root),
                     line=exc.lineno or 1,
                     evidence=str(exc),
                     candidate_impact="File could not be scanned.",
                     recommendation="Fix syntax before relying on static audit output.",
+                    confidence="high",
+                )
+            )
+            continue
+        except (OSError, UnicodeError, LookupError) as exc:
+            findings.append(
+                Finding(
+                    category="read-error",
+                    severity="low",
+                    file=display_path(path, scan_root),
+                    line=1,
+                    evidence=f"{type(exc).__name__}: {exc}",
+                    candidate_impact="File could not be read or decoded.",
+                    recommendation="Check file permissions and Python source encoding before relying on audit output.",
                     confidence="high",
                 )
             )
