@@ -317,6 +317,62 @@ class MlxEnvProbeTests(unittest.TestCase):
         if not payload["mlx"]["available"]:
             self.assertIn("import_error", payload["mlx"])
 
+    def test_env_probe_prefers_core_device_info(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            fake_root = Path(tmp)
+            fake_mlx = fake_root / "mlx"
+            fake_mlx.mkdir()
+            (fake_mlx / "__init__.py").write_text("", encoding="utf-8")
+            (fake_mlx / "core.py").write_text(
+                "\n".join(
+                    [
+                        "__version__ = 'fake-mlx'",
+                        "",
+                        "",
+                        "def device_info():",
+                        "    return {'device_name': 'modern-api'}",
+                        "",
+                        "",
+                        "class metal:",
+                        "    @staticmethod",
+                        "    def is_available():",
+                        "        return True",
+                        "",
+                        "    @staticmethod",
+                        "    def device_info():",
+                        "        raise RuntimeError('deprecated metal.device_info used')",
+                        "",
+                    ]
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+            env = os.environ.copy()
+            env["PYTHONPATH"] = str(fake_root)
+
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    str(ENV_PROBE),
+                    str(PLAIN_FIXTURE),
+                    "--python",
+                    sys.executable,
+                    "--format",
+                    "json",
+                ],
+                text=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                check=False,
+                env=env,
+            )
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["status"], "ok")
+        self.assertEqual(payload["mlx"]["device_info"], {"device_name": "modern-api"})
+        self.assertNotIn("device_info_error", payload["mlx"])
+
 
 class MlxBenchmarkTemplateTests(unittest.TestCase):
     script = ROOT / "plugins" / "mlx-optimizer" / "scripts" / "mlx_benchmark_template.py"

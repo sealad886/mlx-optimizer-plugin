@@ -84,17 +84,19 @@ def child_probe() -> dict:
     metal = getattr(mx, "metal", None)
     if metal is not None:
         is_available = getattr(metal, "is_available", None)
-        device_info = getattr(metal, "device_info", None)
         if callable(is_available):
             try:
                 payload["mlx"]["metal_available"] = bool(is_available())
             except Exception as exc:
                 payload["mlx"]["metal_available_error"] = repr(exc)
-        if callable(device_info):
-            try:
-                payload["mlx"]["device_info"] = json_safe(device_info())
-            except Exception as exc:
-                payload["mlx"]["device_info_error"] = repr(exc)
+    device_info = getattr(mx, "device_info", None)
+    if not callable(device_info) and metal is not None:
+        device_info = getattr(metal, "device_info", None)
+    if callable(device_info):
+        try:
+            payload["mlx"]["device_info"] = json_safe(device_info())
+        except Exception as exc:
+            payload["mlx"]["device_info_error"] = repr(exc)
     for name in (
         "get_active_memory",
         "get_peak_memory",
