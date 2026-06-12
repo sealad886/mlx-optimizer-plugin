@@ -1,4 +1,5 @@
 import json
+import platform
 import subprocess
 import sys
 import tempfile
@@ -181,6 +182,24 @@ class MlxAuditTests(unittest.TestCase):
 
 
 class MlxEnvProbeTests(unittest.TestCase):
+    def run_env_probe_json(self, *args):
+        result = subprocess.run(
+            [
+                sys.executable,
+                str(ENV_PROBE),
+                str(PLAIN_FIXTURE),
+                *args,
+                "--format",
+                "json",
+            ],
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            check=False,
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
+        return json.loads(result.stdout)
+
     def test_env_probe_reports_missing_venv(self):
         result = subprocess.run(
             [
@@ -220,3 +239,52 @@ class MlxEnvProbeTests(unittest.TestCase):
         payload = json.loads(result.stdout)
         self.assertEqual(payload["status"], "ok")
         self.assertEqual(Path(payload["python"]["executable"]).resolve(), Path(sys.executable).resolve())
+
+    def test_env_probe_reports_invalid_explicit_python_as_probe_failure(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            missing_python = Path(tmp) / "missing-python"
+
+            payload = self.run_env_probe_json("--python", str(missing_python))
+
+        self.assertEqual(payload["status"], "probe-failed")
+        self.assertIn("recommended_action", payload)
+        self.assertIn(str(missing_python), payload["python"]["executable"])
+
+    def test_env_probe_reports_non_json_child_stdout_as_probe_failure(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            fake_python = Path(tmp) / "fake-python"
+            fake_python.write_text("#!/bin/sh\nprintf 'not json\\n'\n", encoding="utf-8")
+            fake_python.chmod(0o755)
+
+            payload = self.run_env_probe_json("--python", str(fake_python))
+
+        self.assertEqual(payload["status"], "probe-failed")
+        self.assertEqual(payload["stdout"], "not json\n")
+        self.assertIn("valid JSON", payload["recommended_action"])
+
+    def test_env_probe_markdown_reports_python_and_mlx_evidence(self):
+        result = subprocess.run(
+            [
+                sys.executable,
+                str(ENV_PROBE),
+                str(PLAIN_FIXTURE),
+                "--python",
+                sys.executable,
+            ],
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            check=False,
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn(f"- Python version: `{sys.version.split()[0]}`", result.stdout)
+        self.assertIn(f"- Python platform: `{platform.platform()}`", result.stdout)
+        self.assertIn("- MLX available:", result.stdout)
+
+    def test_env_probe_reports_mlx_import_status_without_host_assumptions(self):
+        payload = self.run_env_probe_json("--python", sys.executable)
+
+        self.assertIn("mlx", payload)
+        self.assertIsInstance(payload["mlx"]["available"], bool)
+        if not payload["mlx"]["available"]:
+            self.assertIn("import_error", payload["mlx"])
