@@ -1,0 +1,19 @@
+{
+  "name": "mlx-optimizer",
+  "description": "Python-first MLX optimization skills, references, and audit scripts for Apple Silicon.",
+  "version": "0.1.0",
+  "author": {
+    "name": "Andrew"
+  },
+  "license": "MIT",
+  "keywords": [
+    "mlx",
+    "apple-silicon",
+    "performance",
+    "optimization",
+    "python",
+    "metal"
+  ],
+  "category": "Productivity",
+  "skills": "plugins/mlx-optimizer/skills/"
+}

@@ -1,0 +1,20 @@
+{
+  "name": "mlx-optimizer-local",
+  "interface": {
+    "displayName": "MLX Optimizer Local"
+  },
+  "plugins": [
+    {
+      "name": "mlx-optimizer",
+      "source": {
+        "source": "local",
+        "path": "./plugins/mlx-optimizer"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}

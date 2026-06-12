@@ -13,6 +13,9 @@ AUDIT = ROOT / "plugins" / "mlx-optimizer" / "scripts" / "mlx_audit.py"
 ENV_PROBE = ROOT / "plugins" / "mlx-optimizer" / "scripts" / "mlx_env_probe.py"
 MLX_FIXTURE = ROOT / "tests" / "fixtures" / "mlx_project"
 PLAIN_FIXTURE = ROOT / "tests" / "fixtures" / "plain_project"
+ROOT_PLUGIN_JSON = ROOT / "plugin.json"
+COPILOT_MARKETPLACE = ROOT / ".github" / "plugin" / "marketplace.json"
+CODEX_MARKETPLACE = ROOT / ".agents" / "plugins" / "marketplace.json"
 
 
 class MlxAuditTests(unittest.TestCase):
@@ -514,3 +517,30 @@ class MlxBenchmarkTemplateTests(unittest.TestCase):
             self.assertIn("eval:(14,)", records)
             self.assertIn("synchronize", records)
             self.assertNotIn("array:[0]", records)
+
+
+class PluginPackagingTests(unittest.TestCase):
+    def test_copilot_root_plugin_points_to_existing_skills(self):
+        payload = json.loads(ROOT_PLUGIN_JSON.read_text(encoding="utf-8"))
+
+        self.assertEqual(payload["name"], "mlx-optimizer")
+        self.assertEqual(payload["version"], "0.1.0")
+        skills_path = ROOT / payload["skills"]
+        self.assertTrue(skills_path.is_dir(), skills_path)
+        self.assertTrue((skills_path / "mlx-optimizer" / "SKILL.md").is_file())
+
+    def test_copilot_marketplace_points_to_root_plugin(self):
+        payload = json.loads(COPILOT_MARKETPLACE.read_text(encoding="utf-8"))
+
+        self.assertEqual(payload["name"], "mlx-optimizer")
+        self.assertEqual(payload["plugins"][0]["name"], "mlx-optimizer")
+        source = payload["plugins"][0]["source"]
+        self.assertTrue((ROOT / source / "plugin.json").resolve().is_file())
+
+    def test_codex_marketplace_points_to_codex_plugin(self):
+        payload = json.loads(CODEX_MARKETPLACE.read_text(encoding="utf-8"))
+
+        self.assertEqual(payload["name"], "mlx-optimizer-local")
+        self.assertEqual(payload["plugins"][0]["name"], "mlx-optimizer")
+        source = payload["plugins"][0]["source"]["path"]
+        self.assertTrue((ROOT / source / ".codex-plugin" / "plugin.json").resolve().is_file())

@@ -1,0 +1,32 @@
+{
+  "name": "mlx-optimizer",
+  "owner": {
+    "name": "Andrew"
+  },
+  "metadata": {
+    "description": "MLX optimization plugin marketplace for GitHub Copilot CLI and VS Code.",
+    "version": "0.1.0"
+  },
+  "plugins": [
+    {
+      "name": "mlx-optimizer",
+      "description": "Python-first MLX optimization skills, references, and audit scripts for Apple Silicon.",
+      "version": "0.1.0",
+      "source": ".",
+      "author": {
+        "name": "Andrew"
+      },
+      "license": "MIT",
+      "keywords": [
+        "mlx",
+        "apple-silicon",
+        "performance",
+        "optimization",
+        "python",
+        "metal"
+      ],
+      "category": "Productivity",
+      "skills": "plugins/mlx-optimizer/skills/"
+    }
+  ]
+}
