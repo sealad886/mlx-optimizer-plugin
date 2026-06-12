@@ -178,3 +178,45 @@ class MlxAuditTests(unittest.TestCase):
 
         self.assertEqual(payload["summary"]["files_scanned"], 1)
         self.assertEqual(payload["findings"], [])
+
+
+class MlxEnvProbeTests(unittest.TestCase):
+    def test_env_probe_reports_missing_venv(self):
+        result = subprocess.run(
+            [
+                sys.executable,
+                str(ENV_PROBE),
+                str(PLAIN_FIXTURE),
+                "--format",
+                "json",
+            ],
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            check=False,
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["status"], "missing-venv")
+        self.assertIn(".venv", payload["recommended_action"])
+
+    def test_env_probe_uses_explicit_python(self):
+        result = subprocess.run(
+            [
+                sys.executable,
+                str(ENV_PROBE),
+                str(PLAIN_FIXTURE),
+                "--python",
+                sys.executable,
+                "--format",
+                "json",
+            ],
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            check=False,
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["status"], "ok")
+        self.assertEqual(Path(payload["python"]["executable"]).resolve(), Path(sys.executable).resolve())
