@@ -13,6 +13,10 @@ OOM triage.
 - `mx.set_wired_limit(bytes)`
 - `mx.clear_cache()`
 
+`mx.set_wired_limit(bytes)` is only useful on macOS 15.0 or higher. Check
+`mx.device_info()` for `"max_recommended_working_set_size"` and `"memory_size"`
+before changing it.
+
 ## Dtype Policy
 
 - Keep model parameters, activations, and optimizer state dtype choices explicit.

@@ -11,6 +11,13 @@ Use this reference when normal MLX-level optimization is not enough.
 5. Consider `mx.fast` primitives, custom Metal kernels, or C++ extensions only
    after profiling identifies a kernel-level bottleneck.
 
+## Metal Capture Prerequisites
+
+- Run with `MTL_CAPTURE_ENABLED=1` for GPU trace capture.
+- Start capture with `mx.metal.start_capture(path)`.
+- Stop capture with `mx.metal.stop_capture()`.
+- Ensure the trace path does not already exist before capture starts.
+
 ## Custom Kernel Gate
 
 Recommend custom Metal kernels only when all are true:
