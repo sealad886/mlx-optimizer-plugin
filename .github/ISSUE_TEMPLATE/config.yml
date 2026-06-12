@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+# contact_links:
+#   - name: Security Issue
+#     url: https://github.com/sealad886/mlx-optimizer-plugin/security/advisories/new
+#     about: Please report security vulnerabilities through GitHub Security Advisories.
