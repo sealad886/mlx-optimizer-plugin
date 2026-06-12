@@ -28,3 +28,14 @@ python3 /Users/andrew/.codex/skills/.system/plugin-creator/scripts/validate_plug
 ```
 
 Do not install Python packages globally.
+
+## Validation Evidence
+
+Before handing off implementation, run:
+
+```bash
+.venv/bin/python -m unittest discover -s tests -v
+.venv/bin/python -m py_compile plugins/mlx-optimizer/scripts/*.py
+python3 /Users/andrew/.codex/skills/.system/plugin-creator/scripts/validate_plugin.py plugins/mlx-optimizer
+for skill in plugins/mlx-optimizer/skills/*; do python3 /Users/andrew/.codex/skills/.system/skill-creator/scripts/quick_validate.py "$skill"; done
+```
