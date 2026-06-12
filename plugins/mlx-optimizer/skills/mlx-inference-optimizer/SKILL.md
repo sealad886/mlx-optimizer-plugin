@@ -8,6 +8,11 @@ description: Optimize Python MLX inference and generation loops with warmup, bat
 Use this skill for MLX inference, generation, serving loops, batch scoring,
 streaming output, or latency/throughput questions.
 
+## Python Environment
+
+Before any Python execution, use the target repo's `.venv`. Never install
+Python packages globally.
+
 ## Required References
 
 - `../../references/inference-patterns.md`

@@ -15,6 +15,8 @@ or explain MLX code on Apple Silicon.
 3. Inspect project structure before proposing new modules.
 4. Treat static observations as candidate findings until verified.
 5. Require concrete evidence for optimization claims.
+6. For version-sensitive MLX API behavior, retrieve current authoritative MLX
+   docs before implementation or recommendations.
 
 ## Routing
 

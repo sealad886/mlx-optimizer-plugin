@@ -7,6 +7,11 @@ description: Audit Python MLX repos for lazy-eval, synchronization, compile, dty
 
 Use this skill for repo-wide MLX performance reviews and unknown bottlenecks.
 
+## Python Environment
+
+Before any Python execution, use the target repo's `.venv`. Never install
+Python packages globally.
+
 ## Required References
 
 - `../../references/mlx-core-concepts.md`
@@ -20,7 +25,7 @@ Use this skill for repo-wide MLX performance reviews and unknown bottlenecks.
 1. Inspect repo state with `git --no-pager status --short`.
 2. Locate dependency files, MLX imports, training loops, inference loops,
    dataloaders, benchmark scripts, and progress-reporting patterns.
-3. Run `plugins/mlx-optimizer/scripts/mlx_audit.py` from this plugin repo when
+3. Run `../../scripts/mlx_audit.py` from this plugin repo when
    the target repo is local and scanning is useful.
 4. Keep candidate findings separate from verified findings.
 5. Recommend measurement before changes: warmup, synchronization, repeated runs,

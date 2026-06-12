@@ -8,6 +8,11 @@ description: Advise on Python-first MLX integration with Swift, C, C++, and non-
 Use this skill when the user asks how MLX work should cross language or app
 runtime boundaries.
 
+## Python Environment
+
+Before any Python execution, use the target repo's `.venv`. Never install
+Python packages globally.
+
 ## Required References
 
 - `../../references/portability-bridges.md`

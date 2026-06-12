@@ -8,6 +8,11 @@ description: Optimize Python MLX training loops with value_and_grad, accumulatio
 Use this skill when the user points to MLX model training, fine-tuning,
 pretraining, loss computation, optimizer updates, or validation throughput.
 
+## Python Environment
+
+Before any Python execution, use the target repo's `.venv`. Never install
+Python packages globally.
+
 ## Required References
 
 - `../../references/training-patterns.md`

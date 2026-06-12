@@ -8,6 +8,11 @@ description: Guide MLX Metal profiling, mx.fast escalation, custom Metal kernels
 Use this skill only after normal MLX-level issues have been checked or when the
 user explicitly asks about Metal capture, custom kernels, or native extensions.
 
+## Python Environment
+
+Before any Python execution, use the target repo's `.venv`. Never install
+Python packages globally.
+
 ## Required References
 
 - `../../references/profiling-and-metal.md`
