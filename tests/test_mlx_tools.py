@@ -288,3 +288,29 @@ class MlxEnvProbeTests(unittest.TestCase):
         self.assertIsInstance(payload["mlx"]["available"], bool)
         if not payload["mlx"]["available"]:
             self.assertIn("import_error", payload["mlx"])
+
+
+class MlxBenchmarkTemplateTests(unittest.TestCase):
+    def test_benchmark_template_runs_without_mlx(self):
+        script = ROOT / "plugins" / "mlx-optimizer" / "scripts" / "mlx_benchmark_template.py"
+        result = subprocess.run(
+            [
+                sys.executable,
+                str(script),
+                "--runs",
+                "2",
+                "--warmup",
+                "1",
+                "--format",
+                "json",
+            ],
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            check=False,
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["runs"], 2)
+        self.assertIn("median_seconds", payload)
+        self.assertIn("Benchmark", result.stderr)
