@@ -15,7 +15,8 @@ OOM triage.
 
 `mx.set_wired_limit(bytes)` is only useful on macOS 15.0 or higher. Check
 `mx.device_info()` for `"max_recommended_working_set_size"` and `"memory_size"`
-before changing it.
+before changing it. The wired limit should remain strictly below total memory;
+setting it above the system wired limit is an error.
 
 ## Dtype Policy
 

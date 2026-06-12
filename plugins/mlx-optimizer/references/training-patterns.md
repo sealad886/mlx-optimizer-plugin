@@ -4,7 +4,7 @@ Use this reference for MLX training loops.
 
 ## Required Review Points
 
-- `mx.value_and_grad` placement.
+- `nn.value_and_grad` versus `mlx.core.value_and_grad` namespace and placement.
 - Optimizer update path.
 - Gradient accumulation semantics.
 - Validation cadence and synchronization.
