@@ -24,7 +24,7 @@ Use the repo-local virtual environment for Python commands:
 python3 -m venv .venv
 .venv/bin/python -m unittest discover -s tests -v
 .venv/bin/python -m py_compile plugins/mlx-optimizer/scripts/*.py
-python3 /Users/andrew/.codex/skills/.system/plugin-creator/scripts/validate_plugin.py plugins/mlx-optimizer
+.venv/bin/python /Users/andrew/.codex/skills/.system/plugin-creator/scripts/validate_plugin.py plugins/mlx-optimizer
 ```
 
 Do not install Python packages globally.
@@ -36,6 +36,8 @@ Before handing off implementation, run:
 ```bash
 .venv/bin/python -m unittest discover -s tests -v
 .venv/bin/python -m py_compile plugins/mlx-optimizer/scripts/*.py
-python3 /Users/andrew/.codex/skills/.system/plugin-creator/scripts/validate_plugin.py plugins/mlx-optimizer
-for skill in plugins/mlx-optimizer/skills/*; do python3 /Users/andrew/.codex/skills/.system/skill-creator/scripts/quick_validate.py "$skill"; done
+.venv/bin/python /Users/andrew/.codex/skills/.system/plugin-creator/scripts/validate_plugin.py plugins/mlx-optimizer
+for skill in plugins/mlx-optimizer/skills/*; do .venv/bin/python /Users/andrew/.codex/skills/.system/skill-creator/scripts/quick_validate.py "$skill"; done
 ```
+
+Record command outcomes in the final response.
