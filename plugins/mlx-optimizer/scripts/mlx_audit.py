@@ -204,19 +204,6 @@ class FileAnalyzer(ast.NodeVisitor):
                     "Force completion before stopping timers and record the synchronization boundary.",
                     "medium",
                 )
-        if self.has_mlx_import and self.has_timing_call and not self.has_eval_call:
-            synthetic = ast.parse("pass").body[0]
-            synthetic.lineno = 1
-            self.add(
-                "benchmark-missing-eval",
-                "medium",
-                synthetic,
-                "timing call without mx.eval in file",
-                "Benchmark may time scheduled work instead of completed MLX work.",
-                "Force completion before stopping timers and record the synchronization boundary.",
-                "medium",
-            )
-
 
 def analyze_file(path: Path, root: Path) -> tuple[bool, list[Finding]]:
     source = path.read_text(encoding="utf-8")

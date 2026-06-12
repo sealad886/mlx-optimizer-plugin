@@ -47,3 +47,34 @@ class MlxAuditTests(unittest.TestCase):
         payload = self.run_audit_json(PLAIN_FIXTURE)
         self.assertEqual(payload["summary"]["files_scanned"], 1)
         self.assertEqual(payload["findings"], [])
+
+    def test_audit_reports_single_missing_eval_per_timed_function(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp) / "bench.py"
+            target.write_text(
+                "\n".join(
+                    [
+                        "import time",
+                        "",
+                        "import mlx.core as mx",
+                        "",
+                        "",
+                        "def benchmark(batch):",
+                        "    start = time.perf_counter()",
+                        "    value = mx.sum(batch)",
+                        "    end = time.perf_counter()",
+                        "    return end - start, value",
+                        "",
+                    ]
+                ),
+                encoding="utf-8",
+            )
+
+            payload = self.run_audit_json(target)
+
+        findings = [
+            finding
+            for finding in payload["findings"]
+            if finding["category"] == "benchmark-missing-eval"
+        ]
+        self.assertEqual(len(findings), 1)
