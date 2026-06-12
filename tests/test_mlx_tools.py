@@ -1,4 +1,5 @@
 import json
+import os
 import platform
 import subprocess
 import sys
@@ -291,26 +292,142 @@ class MlxEnvProbeTests(unittest.TestCase):
 
 
 class MlxBenchmarkTemplateTests(unittest.TestCase):
-    def test_benchmark_template_runs_without_mlx(self):
-        script = ROOT / "plugins" / "mlx-optimizer" / "scripts" / "mlx_benchmark_template.py"
+    script = ROOT / "plugins" / "mlx-optimizer" / "scripts" / "mlx_benchmark_template.py"
+
+    def run_template(self, *args, env=None):
         result = subprocess.run(
             [
                 sys.executable,
-                str(script),
-                "--runs",
-                "2",
-                "--warmup",
-                "1",
-                "--format",
-                "json",
+                str(self.script),
+                *args,
             ],
             text=True,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             check=False,
+            env=env,
+        )
+        return result
+
+    def test_benchmark_template_runs_without_mlx(self):
+        result = self.run_template(
+            "--runs",
+            "2",
+            "--warmup",
+            "1",
+            "--format",
+            "json",
         )
         self.assertEqual(result.returncode, 0, result.stderr)
         payload = json.loads(result.stdout)
         self.assertEqual(payload["runs"], 2)
         self.assertIn("median_seconds", payload)
         self.assertIn("Benchmark", result.stderr)
+
+    def test_benchmark_template_rejects_invalid_numeric_args(self):
+        cases = (
+            ("--runs", "0"),
+            ("--warmup", "-1"),
+            ("--size", "-5"),
+        )
+        for option, value in cases:
+            with self.subTest(option=option, value=value):
+                result = self.run_template(option, value)
+
+                self.assertEqual(result.returncode, 2)
+                self.assertIn("usage:", result.stderr)
+                self.assertNotIn("Traceback", result.stderr)
+                self.assertNotIn("Traceback", result.stdout)
+
+    def test_benchmark_template_writes_json_to_output_file(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            output = Path(tmp) / "benchmark.json"
+
+            result = self.run_template(
+                "--runs",
+                "2",
+                "--warmup",
+                "0",
+                "--format",
+                "json",
+                "--output",
+                str(output),
+            )
+
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertEqual(result.stdout, "")
+            self.assertIn("Benchmark", result.stderr)
+            payload = json.loads(output.read_text(encoding="utf-8"))
+            self.assertEqual(payload["runs"], 2)
+
+    def test_benchmark_template_synchronizes_actual_workload_result(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            fake_root = Path(tmp)
+            fake_mlx = fake_root / "mlx"
+            fake_mlx.mkdir()
+            (fake_mlx / "__init__.py").write_text("", encoding="utf-8")
+            (fake_mlx / "core.py").write_text(
+                "\n".join(
+                    [
+                        "import os",
+                        "from pathlib import Path",
+                        "",
+                        "LOG = Path(os.environ['FAKE_MLX_LOG'])",
+                        "",
+                        "",
+                        "def _append(message):",
+                        "    with LOG.open('a', encoding='utf-8') as handle:",
+                        "        handle.write(message + '\\n')",
+                        "",
+                        "",
+                        "def array(value):",
+                        "    _append('array:' + repr(value))",
+                        "    return ('array', value)",
+                        "",
+                        "",
+                        "def eval(*args):",
+                        "    _append('eval:' + repr(args))",
+                        "",
+                        "",
+                        "def synchronize():",
+                        "    _append('synchronize')",
+                        "",
+                        "",
+                        "def get_active_memory():",
+                        "    return 1",
+                        "",
+                        "",
+                        "def get_peak_memory():",
+                        "    return 2",
+                        "",
+                        "",
+                        "def get_cache_memory():",
+                        "    return 3",
+                        "",
+                    ]
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+            log = fake_root / "mlx.log"
+            env = os.environ.copy()
+            env["PYTHONPATH"] = str(fake_root)
+            env["FAKE_MLX_LOG"] = str(log)
+
+            result = self.run_template(
+                "--runs",
+                "1",
+                "--warmup",
+                "0",
+                "--size",
+                "4",
+                "--format",
+                "json",
+                env=env,
+            )
+
+            self.assertEqual(result.returncode, 0, result.stderr)
+            records = log.read_text(encoding="utf-8").splitlines()
+            self.assertIn("eval:(14,)", records)
+            self.assertIn("synchronize", records)
+            self.assertNotIn("array:[0]", records)

@@ -22,12 +22,15 @@ def workload(size: int) -> int:
     return total
 
 
-def synchronize() -> None:
+def synchronize(result: object) -> None:
     try:
         import mlx.core as mx  # type: ignore
     except Exception:
         return
-    mx.eval(mx.array([0]))
+    mx.eval(result)
+    sync = getattr(mx, "synchronize", None)
+    if callable(sync):
+        sync()
 
 
 def memory_snapshot() -> dict:
@@ -55,19 +58,20 @@ def progress(index: int, total: int, started: float) -> None:
 
 def run_benchmark(runs: int, warmup: int, size: int) -> dict:
     for _ in range(warmup):
-        workload(size)
-        synchronize()
+        warmup_result = workload(size)
+        synchronize(warmup_result)
+    expected = sum(value * value for value in range(size))
     durations: list[float] = []
     started = time.monotonic()
     for index in range(1, runs + 1):
-        progress(index, runs, started)
         before = time.perf_counter()
         result = workload(size)
-        synchronize()
+        synchronize(result)
         after = time.perf_counter()
-        if result != sum(value * value for value in range(size)):
+        if result != expected:
             raise RuntimeError("Correctness check failed for template workload.")
         durations.append(after - before)
+        progress(index, runs, started)
     return {
         "runs": runs,
         "warmup": warmup,
@@ -95,11 +99,33 @@ def render_markdown(payload: dict) -> str:
     )
 
 
+def _int_at_least(value: str, minimum: int, name: str) -> int:
+    try:
+        parsed = int(value)
+    except ValueError as exc:
+        raise argparse.ArgumentTypeError(f"{name} must be an integer") from exc
+    if parsed < minimum:
+        raise argparse.ArgumentTypeError(f"{name} must be >= {minimum}")
+    return parsed
+
+
+def _runs_arg(value: str) -> int:
+    return _int_at_least(value, 1, "--runs")
+
+
+def _warmup_arg(value: str) -> int:
+    return _int_at_least(value, 0, "--warmup")
+
+
+def _size_arg(value: str) -> int:
+    return _int_at_least(value, 1, "--size")
+
+
 def parse_args(argv: Iterable[str]) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Benchmark harness template with warmup and synchronization.")
-    parser.add_argument("--runs", type=int, default=5)
-    parser.add_argument("--warmup", type=int, default=2)
-    parser.add_argument("--size", type=int, default=10000)
+    parser.add_argument("--runs", type=_runs_arg, default=5)
+    parser.add_argument("--warmup", type=_warmup_arg, default=2)
+    parser.add_argument("--size", type=_size_arg, default=10000)
     parser.add_argument("--format", choices=("markdown", "json"), default="markdown")
     parser.add_argument("--output", type=Path)
     return parser.parse_args(list(argv))
