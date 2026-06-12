@@ -52,6 +52,8 @@ def child_probe() -> dict:
     payload: dict = {
         "python": {
             "executable": sys.executable,
+            "prefix": sys.prefix,
+            "base_prefix": sys.base_prefix,
             "version": sys.version.split()[0],
             "machine": platform.machine(),
             "platform": platform.platform(),
@@ -177,6 +179,8 @@ def render_markdown(payload: dict) -> str:
         lines.append(f"- Recommended action: {payload['recommended_action']}")
     if "python" in payload:
         lines.append(f"- Python executable: `{payload['python'].get('executable')}`")
+        lines.append(f"- Python prefix: `{payload['python'].get('prefix')}`")
+        lines.append(f"- Python base prefix: `{payload['python'].get('base_prefix')}`")
         lines.append(f"- Python version: `{payload['python'].get('version')}`")
         lines.append(f"- Python machine: `{payload['python'].get('machine')}`")
         lines.append(f"- Python platform: `{payload['python'].get('platform')}`")
@@ -222,7 +226,7 @@ def parse_args(argv: Iterable[str]) -> argparse.Namespace:
 def main(argv: Iterable[str] | None = None) -> int:
     args = parse_args(sys.argv[1:] if argv is None else argv)
     target = args.target.resolve()
-    python_executable = args.python.resolve() if args.python else default_venv_python(target)
+    python_executable = args.python if args.python else default_venv_python(target)
     if not args.python and not python_executable.exists():
         payload = {
             "status": "missing-venv",
