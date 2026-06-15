@@ -1,7 +1,7 @@
 {
   "name": "mlx-optimizer",
-  "description": "Python-first MLX optimization skills, references, and audit scripts for Apple Silicon.",
   "version": "0.2.0",
+  "description": "Python-first MLX optimization skills, references, and audit scripts for Apple Silicon.",
   "author": {
     "name": "Andrew"
   },
@@ -15,5 +15,5 @@
     "metal"
   ],
   "category": "Productivity",
-  "skills": "plugins/mlx-optimizer/skills/"
+  "skills": "./skills/"
 }

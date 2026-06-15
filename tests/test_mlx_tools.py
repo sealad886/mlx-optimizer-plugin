@@ -16,6 +16,13 @@ PLAIN_FIXTURE = ROOT / "tests" / "fixtures" / "plain_project"
 ROOT_PLUGIN_JSON = ROOT / "plugin.json"
 COPILOT_MARKETPLACE = ROOT / ".github" / "plugin" / "marketplace.json"
 CODEX_MARKETPLACE = ROOT / ".agents" / "plugins" / "marketplace.json"
+PLUGIN_ROOT = ROOT / "plugins" / "mlx-optimizer"
+CODEX_PLUGIN_JSON = PLUGIN_ROOT / ".codex-plugin" / "plugin.json"
+CLAUDE_MARKETPLACE = ROOT / ".claude-plugin" / "marketplace.json"
+CLAUDE_PLUGIN_JSON = PLUGIN_ROOT / ".claude-plugin" / "plugin.json"
+CURSOR_MARKETPLACE = ROOT / ".cursor-plugin" / "marketplace.json"
+CURSOR_PLUGIN_JSON = PLUGIN_ROOT / ".cursor-plugin" / "plugin.json"
+EXPECTED_PLUGIN_VERSION = "0.2.0"
 
 
 class MlxAuditTests(unittest.TestCase):
@@ -520,22 +527,51 @@ class MlxBenchmarkTemplateTests(unittest.TestCase):
 
 
 class PluginPackagingTests(unittest.TestCase):
-    def test_copilot_root_plugin_points_to_existing_skills(self):
-        payload = json.loads(ROOT_PLUGIN_JSON.read_text(encoding="utf-8"))
+    def assert_manifest_points_to_existing_skills(self, manifest_path, manifest_root):
+        payload = json.loads(manifest_path.read_text(encoding="utf-8"))
 
         self.assertEqual(payload["name"], "mlx-optimizer")
-        self.assertEqual(payload["version"], "0.1.0")
-        skills_path = ROOT / payload["skills"]
+        self.assertEqual(payload["version"], EXPECTED_PLUGIN_VERSION)
+        skills_path = (manifest_root / payload["skills"]).resolve()
         self.assertTrue(skills_path.is_dir(), skills_path)
         self.assertTrue((skills_path / "mlx-optimizer" / "SKILL.md").is_file())
+        return payload
+
+    def assert_marketplace_points_to_plugin(self, marketplace_path, marker_dir):
+        payload = json.loads(marketplace_path.read_text(encoding="utf-8"))
+
+        self.assertEqual(payload["name"], "mlx-optimizer")
+        self.assertEqual(payload["plugins"][0]["name"], "mlx-optimizer")
+        self.assertEqual(payload["plugins"][0]["version"], EXPECTED_PLUGIN_VERSION)
+        source = payload["plugins"][0]["source"]
+        self.assertEqual(source, "./plugins/mlx-optimizer")
+        manifest = (ROOT / source / marker_dir / "plugin.json").resolve()
+        self.assertTrue(manifest.is_file(), manifest)
+        return payload
+
+    def test_copilot_root_plugin_points_to_existing_skills(self):
+        payload = self.assert_manifest_points_to_existing_skills(
+            ROOT_PLUGIN_JSON, ROOT
+        )
+
+        self.assertEqual(payload["skills"], "plugins/mlx-optimizer/skills/")
 
     def test_copilot_marketplace_points_to_root_plugin(self):
         payload = json.loads(COPILOT_MARKETPLACE.read_text(encoding="utf-8"))
 
         self.assertEqual(payload["name"], "mlx-optimizer")
+        self.assertEqual(payload["metadata"]["version"], EXPECTED_PLUGIN_VERSION)
         self.assertEqual(payload["plugins"][0]["name"], "mlx-optimizer")
+        self.assertEqual(payload["plugins"][0]["version"], EXPECTED_PLUGIN_VERSION)
         source = payload["plugins"][0]["source"]
         self.assertTrue((ROOT / source / "plugin.json").resolve().is_file())
+
+    def test_codex_plugin_manifest_points_to_existing_skills(self):
+        payload = self.assert_manifest_points_to_existing_skills(
+            CODEX_PLUGIN_JSON, PLUGIN_ROOT
+        )
+
+        self.assertEqual(payload["skills"], "./skills/")
 
     def test_codex_marketplace_points_to_codex_plugin(self):
         payload = json.loads(CODEX_MARKETPLACE.read_text(encoding="utf-8"))
@@ -544,3 +580,27 @@ class PluginPackagingTests(unittest.TestCase):
         self.assertEqual(payload["plugins"][0]["name"], "mlx-optimizer")
         source = payload["plugins"][0]["source"]["path"]
         self.assertTrue((ROOT / source / ".codex-plugin" / "plugin.json").resolve().is_file())
+
+    def test_claude_plugin_manifest_points_to_existing_skills(self):
+        payload = self.assert_manifest_points_to_existing_skills(
+            CLAUDE_PLUGIN_JSON, PLUGIN_ROOT
+        )
+
+        self.assertEqual(payload["skills"], "./skills/")
+
+    def test_claude_marketplace_points_to_claude_plugin(self):
+        self.assert_marketplace_points_to_plugin(
+            CLAUDE_MARKETPLACE, ".claude-plugin"
+        )
+
+    def test_cursor_plugin_manifest_points_to_existing_skills(self):
+        payload = self.assert_manifest_points_to_existing_skills(
+            CURSOR_PLUGIN_JSON, PLUGIN_ROOT
+        )
+
+        self.assertEqual(payload["skills"], "./skills/")
+
+    def test_cursor_marketplace_points_to_cursor_plugin(self):
+        self.assert_marketplace_points_to_plugin(
+            CURSOR_MARKETPLACE, ".cursor-plugin"
+        )

@@ -1,18 +1,15 @@
 {
   "name": "mlx-optimizer",
+  "description": "MLX optimization plugin marketplace for Claude Code.",
   "owner": {
     "name": "Andrew"
-  },
-  "metadata": {
-    "description": "MLX optimization plugin marketplace for GitHub Copilot CLI and VS Code.",
-    "version": "0.2.0"
   },
   "plugins": [
     {
       "name": "mlx-optimizer",
       "description": "Python-first MLX optimization skills, references, and audit scripts for Apple Silicon.",
       "version": "0.2.0",
-      "source": ".",
+      "source": "./plugins/mlx-optimizer",
       "author": {
         "name": "Andrew"
       },
@@ -26,7 +23,7 @@
         "metal"
       ],
       "category": "Productivity",
-      "skills": "plugins/mlx-optimizer/skills/"
+      "skills": "./skills/"
     }
   ]
 }
