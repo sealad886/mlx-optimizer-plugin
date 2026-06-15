@@ -15,6 +15,8 @@ assignees: ""
 - [ ] Codex install or runtime
 - [ ] GitHub Copilot CLI install or runtime
 - [ ] VS Code Agent Plugin install or runtime
+- [ ] Claude Code install or runtime
+- [ ] Cursor install or runtime
 - [ ] Skill instructions
 - [ ] Reference documentation
 - [ ] `mlx_audit.py`
@@ -43,7 +45,7 @@ assignees: ""
 - Python version:
 - MLX version, if relevant:
 - Codex version, if relevant:
-- GitHub Copilot CLI or VS Code version, if relevant:
+- GitHub Copilot CLI, VS Code, Claude Code, or Cursor version, if relevant:
 - Install command or script command:
 
 ## Logs or Output

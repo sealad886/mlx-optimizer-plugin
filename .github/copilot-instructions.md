@@ -21,13 +21,14 @@ above after refreshing.
 ## 1. Repository Overview
 
 This repository packages `mlx-optimizer`, a Python-first MLX optimization plugin
-for Apple Silicon. It targets Codex, GitHub Copilot CLI, and VS Code Agent
-Plugins. The plugin provides skills, references, scripts, and templates for
+for Apple Silicon. It targets Codex, GitHub Copilot CLI, VS Code Agent Plugins,
+Claude Code, and Cursor. The plugin provides skills, references, scripts, and templates for
 evidence-based MLX audits, training-loop optimization, inference optimization,
 Metal profiling escalation, and language-boundary guidance.
 
 The canonical plugin implementation is in `plugins/mlx-optimizer/`. Root-level
-metadata exists for Copilot/VS Code packaging.
+metadata exists for Copilot/VS Code packaging, and tool-specific marketplace
+files exist for Codex, Claude Code, and Cursor.
 
 ## 2. Build, Test, and Lint
 
@@ -40,7 +41,11 @@ python3 -m venv .venv
 .venv/bin/python -m json.tool plugin.json >/dev/null
 .venv/bin/python -m json.tool .github/plugin/marketplace.json >/dev/null
 .venv/bin/python -m json.tool .agents/plugins/marketplace.json >/dev/null
+.venv/bin/python -m json.tool .claude-plugin/marketplace.json >/dev/null
+.venv/bin/python -m json.tool .cursor-plugin/marketplace.json >/dev/null
 .venv/bin/python -m json.tool plugins/mlx-optimizer/.codex-plugin/plugin.json >/dev/null
+.venv/bin/python -m json.tool plugins/mlx-optimizer/.claude-plugin/plugin.json >/dev/null
+.venv/bin/python -m json.tool plugins/mlx-optimizer/.cursor-plugin/plugin.json >/dev/null
 ```
 
 When Codex system validators are available locally, also run:
@@ -59,8 +64,12 @@ There is no package install step today. Scripts use the Python standard library.
 ```text
 plugin.json                                      Copilot/VS Code plugin manifest
 .agents/plugins/marketplace.json                Codex marketplace entry
+.claude-plugin/marketplace.json                 Claude Code marketplace entry
+.cursor-plugin/marketplace.json                 Cursor marketplace entry
 .github/plugin/marketplace.json                 Copilot/VS Code marketplace entry
 plugins/mlx-optimizer/.codex-plugin/plugin.json Codex plugin manifest
+plugins/mlx-optimizer/.claude-plugin/plugin.json Claude Code plugin manifest
+plugins/mlx-optimizer/.cursor-plugin/plugin.json Cursor plugin manifest
 plugins/mlx-optimizer/skills/                   Skill entrypoints
 plugins/mlx-optimizer/references/               Task-routed MLX references
 plugins/mlx-optimizer/scripts/                  Audit, environment probe, benchmark template
@@ -84,9 +93,13 @@ and closes them after 7 more days.
 
 ## 5. Conventions
 
-- Preserve the two packaging layers: Codex uses `plugins/mlx-optimizer/` plus
+- Preserve the packaging layers: Codex uses `plugins/mlx-optimizer/` plus
   `.agents/plugins/marketplace.json`; Copilot/VS Code uses root `plugin.json`
-  plus `.github/plugin/marketplace.json`.
+  plus `.github/plugin/marketplace.json`; Claude Code uses
+  `plugins/mlx-optimizer/.claude-plugin/plugin.json` plus
+  `.claude-plugin/marketplace.json`; Cursor uses
+  `plugins/mlx-optimizer/.cursor-plugin/plugin.json` plus
+  `.cursor-plugin/marketplace.json`.
 - Keep version numbers aligned across versioned manifests.
 - Reuse existing skills, references, scripts, and templates before adding new
   parallel paths.

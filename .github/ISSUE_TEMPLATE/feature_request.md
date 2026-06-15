@@ -27,6 +27,8 @@ assignees: ""
 - [ ] Codex
 - [ ] GitHub Copilot CLI
 - [ ] VS Code Agent Plugins
+- [ ] Claude Code
+- [ ] Cursor
 - [ ] Skills
 - [ ] References
 - [ ] Scripts

@@ -27,17 +27,20 @@ workload proves them.
 
 ## Supported Plugin Surfaces
 
-This repository contains two plugin packaging layers. Keep them distinct when
+This repository contains multiple plugin packaging layers. Keep them distinct when
 editing manifests or release metadata.
 
 | Surface | Files | Install selector |
 | --- | --- | --- |
 | Codex | `plugins/mlx-optimizer/.codex-plugin/plugin.json` and `.agents/plugins/marketplace.json` | `mlx-optimizer@mlx-optimizer-local` |
 | GitHub Copilot CLI / VS Code Agent Plugins | `plugin.json` and `.github/plugin/marketplace.json` | `mlx-optimizer@mlx-optimizer` |
+| Claude Code | `plugins/mlx-optimizer/.claude-plugin/plugin.json` and `.claude-plugin/marketplace.json` | `mlx-optimizer@mlx-optimizer` |
+| Cursor | `plugins/mlx-optimizer/.cursor-plugin/plugin.json` and `.cursor-plugin/marketplace.json` | Local/team marketplace plugin |
 
 The canonical plugin implementation lives in `plugins/mlx-optimizer/`. The root
 `plugin.json` exists so Copilot and VS Code can resolve the same skill bundle
-from the repository root.
+from the repository root. Claude Code and Cursor use tool-specific manifests
+inside the canonical plugin root and marketplace files at the repository root.
 
 ## Installation
 
@@ -76,6 +79,20 @@ Copilot CLI prefers marketplace-based installs:
 copilot plugin install /Users/andrew/Documents/mlx-optimizer-plugin
 ```
 
+### Claude Code
+
+```bash
+claude plugin marketplace add sealad886/mlx-optimizer-plugin
+claude plugin install mlx-optimizer@mlx-optimizer
+```
+
+For local development, register this checkout:
+
+```bash
+claude plugin marketplace add /Users/andrew/Documents/mlx-optimizer-plugin
+claude plugin install mlx-optimizer@mlx-optimizer
+```
+
 ### VS Code Agent Plugins
 
 Install from source with the VS Code command palette action
@@ -105,6 +122,24 @@ For local plugin development, register this checkout:
   }
 }
 ```
+
+### Cursor
+
+For local plugin development, symlink the canonical plugin root into Cursor's
+local plugin directory:
+
+```bash
+mkdir -p ~/.cursor/plugins/local
+ln -s /Users/andrew/Documents/mlx-optimizer-plugin/plugins/mlx-optimizer ~/.cursor/plugins/local/mlx-optimizer
+```
+
+Then restart Cursor or run `Developer: Reload Window`.
+
+For team marketplace distribution, use Cursor's dashboard marketplace import
+flow with this repository. Cursor reads `.cursor-plugin/marketplace.json` at
+the repository root and loads `plugins/mlx-optimizer/.cursor-plugin/plugin.json`
+from the plugin source path. This repository does not claim public Cursor
+Marketplace publication until that submission is completed separately.
 
 ## Skill Guide
 
@@ -189,9 +224,13 @@ copying the template into another repo.
 .
 ├── plugin.json
 ├── .agents/plugins/marketplace.json
+├── .claude-plugin/marketplace.json
+├── .cursor-plugin/marketplace.json
 ├── .github/plugin/marketplace.json
 ├── plugins/mlx-optimizer/
+│   ├── .claude-plugin/plugin.json
 │   ├── .codex-plugin/plugin.json
+│   ├── .cursor-plugin/plugin.json
 │   ├── skills/
 │   ├── references/
 │   ├── scripts/
@@ -240,7 +279,11 @@ Run these checks before handing off changes:
 .venv/bin/python -m json.tool plugin.json >/dev/null
 .venv/bin/python -m json.tool .github/plugin/marketplace.json >/dev/null
 .venv/bin/python -m json.tool .agents/plugins/marketplace.json >/dev/null
+.venv/bin/python -m json.tool .claude-plugin/marketplace.json >/dev/null
+.venv/bin/python -m json.tool .cursor-plugin/marketplace.json >/dev/null
 .venv/bin/python -m json.tool plugins/mlx-optimizer/.codex-plugin/plugin.json >/dev/null
+.venv/bin/python -m json.tool plugins/mlx-optimizer/.claude-plugin/plugin.json >/dev/null
+.venv/bin/python -m json.tool plugins/mlx-optimizer/.cursor-plugin/plugin.json >/dev/null
 ```
 
 When Codex system skills are available locally, also run:
@@ -259,6 +302,8 @@ codex plugin marketplace add /Users/andrew/Documents/mlx-optimizer-plugin --json
 codex plugin add mlx-optimizer@mlx-optimizer-local --json
 copilot plugin marketplace add /Users/andrew/Documents/mlx-optimizer-plugin
 copilot plugin install mlx-optimizer@mlx-optimizer
+claude plugin marketplace add /Users/andrew/Documents/mlx-optimizer-plugin
+claude plugin install mlx-optimizer@mlx-optimizer
 ```
 
 ## Release Checklist
@@ -268,7 +313,11 @@ release, update every versioned surface that applies:
 
 - `plugin.json`
 - `.github/plugin/marketplace.json`
+- `.claude-plugin/marketplace.json`
+- `.cursor-plugin/marketplace.json`
 - `plugins/mlx-optimizer/.codex-plugin/plugin.json`
+- `plugins/mlx-optimizer/.claude-plugin/plugin.json`
+- `plugins/mlx-optimizer/.cursor-plugin/plugin.json`
 - README installation or compatibility notes, when behavior changes
 
 Before tagging or publishing:
@@ -277,7 +326,8 @@ Before tagging or publishing:
 2. Run plugin validators if available.
 3. Smoke install through Codex and Copilot marketplace paths when the change
    affects packaging.
-4. Confirm `.agents/plugins/marketplace.json` and `.github/plugin/marketplace.json`
+4. Confirm `.agents/plugins/marketplace.json`, `.github/plugin/marketplace.json`,
+   `.claude-plugin/marketplace.json`, and `.cursor-plugin/marketplace.json`
    still point to existing manifests.
 5. Commit with a Conventional Commits message.
 
