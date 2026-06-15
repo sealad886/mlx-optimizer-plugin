@@ -49,7 +49,7 @@ inside the canonical plugin root and marketplace files at the repository root.
 ### Codex From This Checkout
 
 ```bash
-codex plugin marketplace add /Users/andrew/Documents/mlx-optimizer-plugin --json
+codex plugin marketplace add /path/to/mlx-optimizer-plugin --json
 codex plugin add mlx-optimizer@mlx-optimizer-local --json
 ```
 
@@ -70,7 +70,7 @@ copilot plugin install mlx-optimizer@mlx-optimizer
 For local development, register this checkout as the marketplace source:
 
 ```bash
-copilot plugin marketplace add /Users/andrew/Documents/mlx-optimizer-plugin
+copilot plugin marketplace add /path/to/mlx-optimizer-plugin
 copilot plugin install mlx-optimizer@mlx-optimizer
 ```
 
@@ -78,7 +78,7 @@ Direct local installs can still be useful while developing the plugin, but the
 Copilot CLI prefers marketplace-based installs:
 
 ```bash
-copilot plugin install /Users/andrew/Documents/mlx-optimizer-plugin
+copilot plugin install /path/to/mlx-optimizer-plugin
 ```
 
 ### Claude Code
@@ -91,7 +91,7 @@ claude plugin install mlx-optimizer@mlx-optimizer
 For local development, register this checkout:
 
 ```bash
-claude plugin marketplace add /Users/andrew/Documents/mlx-optimizer-plugin
+claude plugin marketplace add /path/to/mlx-optimizer-plugin
 claude plugin install mlx-optimizer@mlx-optimizer
 ```
 
@@ -120,7 +120,7 @@ For local plugin development, register this checkout:
 ```json
 {
   "chat.pluginLocations": {
-    "/Users/andrew/Documents/mlx-optimizer-plugin": true
+    "/path/to/mlx-optimizer-plugin": true
   }
 }
 ```
@@ -132,7 +132,7 @@ local plugin directory:
 
 ```bash
 mkdir -p ~/.cursor/plugins/local
-ln -s /Users/andrew/Documents/mlx-optimizer-plugin/plugins/mlx-optimizer ~/.cursor/plugins/local/mlx-optimizer
+ln -s /path/to/mlx-optimizer-plugin/plugins/mlx-optimizer ~/.cursor/plugins/local/mlx-optimizer
 ```
 
 Then restart Cursor or run `Developer: Reload Window`.
@@ -291,20 +291,20 @@ Run these checks before handing off changes:
 When Codex system skills are available locally, also run:
 
 ```bash
-.venv/bin/python /Users/andrew/.codex/skills/.system/plugin-creator/scripts/validate_plugin.py plugins/mlx-optimizer
+.venv/bin/python "${CODEX_HOME:-$HOME/.codex}/skills/.system/plugin-creator/scripts/validate_plugin.py" plugins/mlx-optimizer
 for skill in plugins/mlx-optimizer/skills/*; do
-  .venv/bin/python /Users/andrew/.codex/skills/.system/skill-creator/scripts/quick_validate.py "$skill"
+  .venv/bin/python "${CODEX_HOME:-$HOME/.codex}/skills/.system/skill-creator/scripts/quick_validate.py" "$skill"
 done
 ```
 
 For packaging changes, add isolated install smoke tests when possible:
 
 ```bash
-codex plugin marketplace add /Users/andrew/Documents/mlx-optimizer-plugin --json
+codex plugin marketplace add /path/to/mlx-optimizer-plugin --json
 codex plugin add mlx-optimizer@mlx-optimizer-local --json
-copilot plugin marketplace add /Users/andrew/Documents/mlx-optimizer-plugin
+copilot plugin marketplace add /path/to/mlx-optimizer-plugin
 copilot plugin install mlx-optimizer@mlx-optimizer
-claude plugin marketplace add /Users/andrew/Documents/mlx-optimizer-plugin
+claude plugin marketplace add /path/to/mlx-optimizer-plugin
 claude plugin install mlx-optimizer@mlx-optimizer
 ```
 

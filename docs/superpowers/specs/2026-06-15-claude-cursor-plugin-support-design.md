@@ -1,7 +1,7 @@
 # Claude Code and Cursor Plugin Support Design
 
 Date: 2026-06-15
-Repo: `/Users/andrew/Documents/mlx-optimizer-plugin`
+Repo: `/path/to/mlx-optimizer-plugin`
 
 ## Goal
 
@@ -123,7 +123,7 @@ claude plugin install mlx-optimizer@mlx-optimizer
 For local development:
 
 ```bash
-claude plugin marketplace add /Users/andrew/Documents/mlx-optimizer-plugin
+claude plugin marketplace add /path/to/mlx-optimizer-plugin
 claude plugin install mlx-optimizer@mlx-optimizer
 ```
 
@@ -234,8 +234,8 @@ Validation commands:
 Optional local tool validation, when installed:
 
 ```bash
-claude plugin validate /Users/andrew/Documents/mlx-optimizer-plugin
-claude plugin validate /Users/andrew/Documents/mlx-optimizer-plugin/plugins/mlx-optimizer
+claude plugin validate /path/to/mlx-optimizer-plugin
+claude plugin validate /path/to/mlx-optimizer-plugin/plugins/mlx-optimizer
 ```
 
 Cursor does not currently provide an equivalent repo-local CLI validator in the

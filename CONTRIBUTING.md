@@ -44,9 +44,9 @@ Run the baseline checks before opening a PR:
 When available on your machine, also run the Codex plugin and skill validators:
 
 ```bash
-.venv/bin/python /Users/andrew/.codex/skills/.system/plugin-creator/scripts/validate_plugin.py plugins/mlx-optimizer
+.venv/bin/python "${CODEX_HOME:-$HOME/.codex}/skills/.system/plugin-creator/scripts/validate_plugin.py" plugins/mlx-optimizer
 for skill in plugins/mlx-optimizer/skills/*; do
-  .venv/bin/python /Users/andrew/.codex/skills/.system/skill-creator/scripts/quick_validate.py "$skill"
+  .venv/bin/python "${CODEX_HOME:-$HOME/.codex}/skills/.system/skill-creator/scripts/quick_validate.py" "$skill"
 done
 ```
 

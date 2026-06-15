@@ -418,7 +418,7 @@ claude plugin install mlx-optimizer@mlx-optimizer
 For local development, register this checkout:
 
 ```bash
-claude plugin marketplace add /Users/andrew/Documents/mlx-optimizer-plugin
+claude plugin marketplace add /path/to/mlx-optimizer-plugin
 claude plugin install mlx-optimizer@mlx-optimizer
 ```
 ````
@@ -435,7 +435,7 @@ local plugin directory:
 
 ```bash
 mkdir -p ~/.cursor/plugins/local
-ln -s /Users/andrew/Documents/mlx-optimizer-plugin/plugins/mlx-optimizer ~/.cursor/plugins/local/mlx-optimizer
+ln -s /path/to/mlx-optimizer-plugin/plugins/mlx-optimizer ~/.cursor/plugins/local/mlx-optimizer
 ```
 
 Then restart Cursor or run `Developer: Reload Window`.
@@ -641,8 +641,8 @@ Expected: all commands exit `0`.
 Run:
 
 ```bash
-if [ -f /Users/andrew/.codex/skills/.system/plugin-creator/scripts/validate_plugin.py ]; then
-  .venv/bin/python /Users/andrew/.codex/skills/.system/plugin-creator/scripts/validate_plugin.py plugins/mlx-optimizer
+if [ -f "${CODEX_HOME:-$HOME/.codex}/skills/.system/plugin-creator/scripts/validate_plugin.py" ]; then
+  .venv/bin/python "${CODEX_HOME:-$HOME/.codex}/skills/.system/plugin-creator/scripts/validate_plugin.py" plugins/mlx-optimizer
 fi
 ```
 
@@ -653,9 +653,9 @@ Expected: validator passes or command is skipped because the validator is absent
 Run:
 
 ```bash
-if [ -f /Users/andrew/.codex/skills/.system/skill-creator/scripts/quick_validate.py ]; then
+if [ -f "${CODEX_HOME:-$HOME/.codex}/skills/.system/skill-creator/scripts/quick_validate.py" ]; then
   for skill in plugins/mlx-optimizer/skills/*; do
-    .venv/bin/python /Users/andrew/.codex/skills/.system/skill-creator/scripts/quick_validate.py "$skill"
+    .venv/bin/python "${CODEX_HOME:-$HOME/.codex}/skills/.system/skill-creator/scripts/quick_validate.py" "$skill"
   done
 fi
 ```
@@ -668,8 +668,8 @@ Run:
 
 ```bash
 if command -v claude >/dev/null 2>&1; then
-  claude plugin validate /Users/andrew/Documents/mlx-optimizer-plugin
-  claude plugin validate /Users/andrew/Documents/mlx-optimizer-plugin/plugins/mlx-optimizer
+  claude plugin validate /path/to/mlx-optimizer-plugin
+  claude plugin validate /path/to/mlx-optimizer-plugin/plugins/mlx-optimizer
 fi
 ```
 
