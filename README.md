@@ -326,8 +326,9 @@ Before tagging or publishing:
 
 1. Run local validation commands.
 2. Run plugin validators if available.
-3. Smoke install through Codex and Copilot marketplace paths when the change
-   affects packaging.
+3. Smoke install through Codex, Copilot, and Claude marketplace paths when tool
+   access is available; for Cursor, validate the documented local/team
+   marketplace path.
 4. Confirm `.agents/plugins/marketplace.json`, `.github/plugin/marketplace.json`,
    `.claude-plugin/marketplace.json`, and `.cursor-plugin/marketplace.json`
    still point to existing manifests.

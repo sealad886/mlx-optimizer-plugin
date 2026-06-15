@@ -38,7 +38,11 @@ Run the baseline checks before opening a PR:
 .venv/bin/python -m json.tool plugin.json >/dev/null
 .venv/bin/python -m json.tool .github/plugin/marketplace.json >/dev/null
 .venv/bin/python -m json.tool .agents/plugins/marketplace.json >/dev/null
+.venv/bin/python -m json.tool .claude-plugin/marketplace.json >/dev/null
+.venv/bin/python -m json.tool .cursor-plugin/marketplace.json >/dev/null
 .venv/bin/python -m json.tool plugins/mlx-optimizer/.codex-plugin/plugin.json >/dev/null
+.venv/bin/python -m json.tool plugins/mlx-optimizer/.claude-plugin/plugin.json >/dev/null
+.venv/bin/python -m json.tool plugins/mlx-optimizer/.cursor-plugin/plugin.json >/dev/null
 ```
 
 When available on your machine, also run the Codex plugin and skill validators:

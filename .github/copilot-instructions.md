@@ -11,7 +11,8 @@ schema_version: 1
 Before starting substantial work, compare this file with the current repo:
 
 ```bash
-git log --oneline 8bcdf3e..HEAD
+LAST_UPDATED_COMMIT="$(sed -n 's/^last_updated_commit: "\(.*\)"/\1/p' .github/copilot-instructions.md)"
+git log --oneline "${LAST_UPDATED_COMMIT}..HEAD"
 ```
 
 If more than 20 commits have landed since `last_updated_commit`, or this file
