@@ -2,8 +2,9 @@
 
 `mlx-optimizer` is a plugin bundle for optimizing Python-first
 [MLX](https://github.com/ml-explore/mlx) projects on Apple Silicon. It gives
-Codex, GitHub Copilot CLI, and VS Code Agent Plugins a focused set of skills,
-reference notes, audit scripts, and report templates for MLX performance work.
+Codex, GitHub Copilot CLI, VS Code Agent Plugins, Claude Code, and Cursor a
+focused set of skills, reference notes, audit scripts, and report templates for
+MLX performance work.
 
 The plugin is intentionally evidence-driven. It helps an agent inspect a target
 repo, identify candidate performance and correctness risks, and verify changes
@@ -21,7 +22,8 @@ workload proves them.
   probing, and copy-ready benchmark scaffolding.
 - Markdown templates for optimization reports, benchmark notes, and before/after
   verification.
-- Packaging for both Codex and GitHub Copilot/VS Code plugin installers.
+- Packaging for Codex, GitHub Copilot/VS Code, Claude Code, and Cursor plugin
+  installers.
 - Smoke tests that validate script behavior and packaging paths without needing
   MLX to be installed.
 
